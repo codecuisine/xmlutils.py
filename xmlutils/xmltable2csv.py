@@ -110,6 +110,8 @@ class xmltable2csv:
             number of records converted
         """
 
+        import pdb
+        pdb.set_trace()
         items = []
 
         depth = 0
@@ -152,6 +154,7 @@ class xmltable2csv:
                     break
                 items.append(elem.text)
 
+        pdb.set_trace()
         self._write_buffer(delimiter)  # write rest of the buffer to file
 
         return n

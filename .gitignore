@@ -1,0 +1,6 @@
+#temps
+*~
+*.pyc
+
+#output
+*.csv
