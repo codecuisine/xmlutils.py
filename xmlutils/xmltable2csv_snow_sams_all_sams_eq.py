@@ -194,7 +194,7 @@ class xmltable2csv:
                 file_ctr+=1 #next row in the dictionary array
                 print "processing file no ", file_ctr, " item no", item_ctr
 
-        pdb.set_trace()
+        #pdb.set_trace()
         self._drop_repetition()
         self._write_buffer(delimiter)  # write rest of the buffer to file
 
@@ -205,9 +205,9 @@ class xmltable2csv:
         Drop any second item which has exactly the Sams field as a 
         a previous on.
         """
-        no_repeat_list = [self.output_dict[0]]
-        sams_hash_table =  {}
-        for cur_item in self.output_dict[1:]:
+        no_repeat_list = []
+        self.sams_hash_table =  {}
+        for cur_item in self.output_dict:
             #make the string to be hashed by concatinating all sams values
             sams_hash_input = ""
             for cur_element in cur_item:
@@ -215,13 +215,14 @@ class xmltable2csv:
                     sams_hash_input += cur_item[cur_element]
 
             #check if we have seen this item already
-            if hash(sams_hash_input) in  sams_hash_table:
+            if hash(sams_hash_input) in  self.sams_hash_table:
                 print "found repeated record: ", cur_item
+                self.sams_hash_table[hash(sams_hash_input)].append(cur_item)
             else:
                 no_repeat_list.append(cur_item)
-                sams_hash_table[hash(sams_hash_input)] = 1
+                self.sams_hash_table[hash(sams_hash_input)] = [cur_item]
 
-        print "from ", len(self.output_dict) - 1, "items , ", len(no_repeat_list) - 1, " have unique collective Sams fields value"
+        print "From ", len(self.output_dict), "items , ", len(no_repeat_list), " have unique collective Sams fields value"
         self.output_dict = no_repeat_list
             
     def _write_buffer(self, delimiter):
@@ -233,6 +234,12 @@ class xmltable2csv:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(self.output_dict)
+
+        with open(self.output_filename+"_with_repetition.csv", 'wb') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            for sams_hash in self.sams_hash_table:
+                dict_writer.writerows(self.sams_hash_table[sams_hash])
 
         #self.output.write('\n'.join([delimiter.join(e) for e in self.output_buffer]) + '\n')
         #self.output_buffer = []
